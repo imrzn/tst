@@ -1,0 +1,51 @@
+---
+layout: default
+title: Update
+---
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css">
+</head>
+<style>
+    * {
+        text-align: center;
+    }
+    #buildButton:hover {
+        color: #fff;
+    }
+</style>
+<div class="container">
+
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-8 text-center mt-5">
+            <h2 style="text-align: center;">Update your site in just one-click</h2>
+        </div>
+        <div class="div">
+            <button class="btn btn-primary mt-5 mb-5" id="buildButton" onclick="buildSite()">UPDATE YOUR SITE</button>
+        </div>
+    </div>
+    <div id="loadingSpinner" style="display: none; text-align: center;">
+        <p>We're re-building your site, please wait for a few seconds...</p>
+        <img src="s.svg" alt="Loading Spinner">
+    </div>
+
+    <div id="successMessage" style="display: none;">
+        <p>Site build completed successfully!</p>
+    </div>
+
+    <script>
+        function buildSite() {
+            var buildButton = document.getElementById('buildButton');
+            var loadingSpinner = document.getElementById('loadingSpinner');
+            var successMessage = document.getElementById('successMessage');
+
+            buildButton.disabled = true;
+            loadingSpinner.style.display = 'block';
+
+            setTimeout(function () {
+                loadingSpinner.style.display = 'none';
+                successMessage.style.display = 'block';
+                buildButton.disabled = false;
+            }, 10000);
+        }
+    </script>
