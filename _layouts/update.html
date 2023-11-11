@@ -1,51 +1,126 @@
----
-layout: default
-title: Update
----
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.2/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <title>{{ site.tile }} | Update Your Site</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .alert {
+            text-align: center;
+            padding: .4rem;
+            font-size: .75rem;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 0.15rem #e90c59 !important;
+            border: #e90c59;
+        }
+    </style>
+    <title>Jekyll Site Rebuild</title>
 </head>
-<style>
-    * {
-        text-align: center;
-    }
-    #buildButton:hover {
-        color: #fff;
-    }
-</style>
-<div class="container">
 
-    <div class="row d-flex justify-content-center">
-        <div class="col-md-8 text-center mt-5">
-            <h2 style="text-align: center;">Update your site in just one-click</h2>
+<body>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="col-md-4">
+            <h4 style="margin: 2rem; text-align: center;">UPDATE YOUR SITE</h4>
+            <form id="rebuildForm">
+                <div class="mb-3">
+                    <input type="text" class="form-control text-center" id="username" placeholder="Enter username"
+                        required>
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control text-center" id="password" placeholder="Enter password"
+                        required>
+                </div>
+                <div class="d-grid gap-2">
+                    <button style="background-color: #e90c59; color: #fff;" type="submit" class="btn">UPDATE
+                        NOW</button>
+                </div>
+            </form>
+            <div id="status" class="mt-3"></div>
+            <div id="spinner" style="display: none; text-align: center;">
+                <img width="64px" src="s.svg" alt="Loading...">
+            </div>
         </div>
-        <div class="div">
-            <button class="btn btn-primary mt-5 mb-5" id="buildButton" onclick="buildSite()">UPDATE YOUR SITE</button>
-        </div>
-    </div>
-    <div id="loadingSpinner" style="display: none; text-align: center;">
-        <p>We're re-building your site, please wait for a few seconds...</p>
-        <img src="s.svg" alt="Loading Spinner">
-    </div>
-
-    <div id="successMessage" style="display: none;">
-        <p>Site build completed successfully!</p>
     </div>
 
     <script>
-        function buildSite() {
-            var buildButton = document.getElementById('buildButton');
-            var loadingSpinner = document.getElementById('loadingSpinner');
-            var successMessage = document.getElementById('successMessage');
+        document.getElementById('rebuildForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            var usernameInput = document.getElementById('username');
+            var passwordInput = document.getElementById('password');
+            var statusElement = document.getElementById('status');
+            var spinnerElement = document.getElementById('spinner');
 
-            buildButton.disabled = true;
-            loadingSpinner.style.display = 'block';
+            spinnerElement.style.display = 'block';
 
-            setTimeout(function () {
-                loadingSpinner.style.display = 'none';
-                successMessage.style.display = 'block';
-                buildButton.disabled = false;
-            }, 10000);
-        }
+            fetch('https://rzwns.github.io/api/auth/v1/api.json')
+                .then(response => response.json())
+                .then(data => {
+                    var encodedUsername = data[0];
+                    var encodedPassword = data[1];
+
+                    var decodedUsername = atob(encodedUsername);
+                    var decodedPassword = atob(encodedPassword);
+
+                    if (usernameInput.value === decodedUsername && passwordInput.value === decodedPassword) {
+                        spinnerElement.style.display = 'none';
+                        statusElement.innerHTML = `
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            Authentication successful!
+                        </div>
+                        `;
+
+                        // Trigger the rebuild request
+                        fetch('https://api.netlify.com/build_hooks/654f7f879a84fd331f8cf605', { method: 'POST' })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Failed to trigger Jekyll site rebuild.');
+                                }
+                                // Show success message after rebuild is complete
+                                statusElement.innerHTML = `
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                Your site has been updated successfully!
+                            </div>
+                            `;
+                                // Reset form input data
+                                document.getElementById('rebuildForm').reset();
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                // Show error message
+                                statusElement.innerHTML = `
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    Failed to update your site, Please Try Again!
+                                </div>
+                                `;
+                            });
+                    } else {
+                        // Hide the loading spinner
+                        spinnerElement.style.display = 'none';
+                        // Show error message
+                        statusElement.innerHTML = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            Username or password is incorrect.
+                        </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Hide the loading spinner
+                    spinnerElement.style.display = 'none';
+                    // Show error message
+                    statusElement.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    Authentication Failed, Please Try Again!
+                    </div>
+                `;
+                });
+        });
     </script>
+</body>
+
+</html>
