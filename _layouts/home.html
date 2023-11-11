@@ -1,0 +1,39 @@
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Email</th>
+    <th>Phone</th>
+  </tr>
+
+  {% assign data = site.data.contacts %}
+  {% if data %}
+    {% for row in data %}
+      <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+      </tr>
+    {% endfor %}
+  {% else %}
+    <tr>
+      <td colspan="2">No data available</td>
+    </tr>
+  {% endif %}
+  <br>
+  <hr>
+  <br>
+  {% assign data = site.data.service %}
+  {% if data %}
+    {% for row in data %}
+      <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+      </tr>
+    {% endfor %}
+  {% else %}
+    <tr>
+      <td colspan="2">No data available</td>
+    </tr>
+  {% endif %}
+</table>
